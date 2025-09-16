@@ -5,6 +5,7 @@ import 'package:maxim_chat/screens/auth_screen.dart';
 import 'package:maxim_chat/screens/check_auth_screen.dart';
 import 'package:maxim_chat/widgets/base_app.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,16 +18,34 @@ class MaximChatApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Provider(
-      create: (context) => AppRepository.create(),
-      child: MaterialApp(
-        routes: {
-          NavigatorNames.base: (context) => BaseApp(),
-          NavigatorNames.checkAuth: (context) => CheckAuthScreen(),
-          NavigatorNames.auth: (context) => AuthScreen(),
-        },
-        initialRoute: 'checkAuth',
-      ),
+    return FutureBuilder<SharedPreferences>(
+      future: SharedPreferences.getInstance(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return MaterialApp(
+            home: Scaffold(body: Center(child: CircularProgressIndicator())),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return MaterialApp(
+            home: Scaffold(body: Center(child: Text('Error loading app'))),
+          );
+        }
+
+        final prefs = snapshot.data!;
+        return Provider<AppRepository>(
+          create: (context) => AppRepository.createSync(prefs),
+          child: MaterialApp(
+            routes: {
+              NavigatorNames.base: (context) => BaseApp(),
+              NavigatorNames.checkAuth: (context) => CheckAuthScreen(),
+              NavigatorNames.auth: (context) => AuthScreen(),
+            },
+            initialRoute: NavigatorNames.checkAuth,
+          ),
+        );
+      },
     );
   }
 }

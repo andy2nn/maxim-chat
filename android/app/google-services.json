@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "675849885596",
+    "firebase_url": "https://maxim-chat-823a3-default-rtdb.firebaseio.com",
+    "project_id": "maxim-chat-823a3",
+    "storage_bucket": "maxim-chat-823a3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:675849885596:android:d809aef47044e4243eda59",
+        "android_client_info": {
+          "package_name": "com.example.maxim_chat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByfWRh3ER3NUguWtaTmD8tJcq1k9NhWPQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -9,23 +9,25 @@ class AppRepository {
   final AuthRepository authRepository;
   final UserRepository userRepository;
   final ChatRepository chatRepository;
+  final SharedPreferences sharedPreferences;
 
-  AppRepository._({
+  AppRepository({
     required this.authRepository,
     required this.userRepository,
     required this.chatRepository,
+    required this.sharedPreferences,
   });
 
-  static Future<AppRepository> create() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
+  factory AppRepository.createSync(SharedPreferences prefs) {
     final userRepo = UserRepository();
     final chatRepo = ChatRepository();
-    final authRepo = AuthRepository(userRepo, sharedPreferences);
+    final authRepo = AuthRepository(userRepo, prefs);
 
-    return AppRepository._(
+    return AppRepository(
       authRepository: authRepo,
       userRepository: userRepo,
       chatRepository: chatRepo,
+      sharedPreferences: prefs,
     );
   }
 

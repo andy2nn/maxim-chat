@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class FriendsView extends StatelessWidget {
-  const FriendsView({super.key});
+class FriendsScreen extends StatelessWidget {
+  const FriendsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

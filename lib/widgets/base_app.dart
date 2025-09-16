@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:maxim_chat/chat_list_view.dart';
-import 'package:maxim_chat/friends_view.dart';
-import 'package:maxim_chat/user_profile_view.dart';
+import 'package:maxim_chat/screens/chat_list_screen.dart';
+import 'package:maxim_chat/screens/friends_screen.dart';
+import 'package:maxim_chat/screens/user_profile_screen.dart';
 
 class BaseApp extends StatefulWidget {
   const BaseApp({super.key});
@@ -13,7 +13,7 @@ class BaseApp extends StatefulWidget {
 class _BaseAppState extends State<BaseApp> {
   int currentIndex = 0;
 
-  final listWidgets = [ChatListView(), FriendsView(), UserProfileView()];
+  final listWidgets = [ChatListScreen(), FriendsScreen(), UserProfileScreen()];
 
   @override
   Widget build(BuildContext context) {

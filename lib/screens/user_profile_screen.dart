@@ -365,34 +365,6 @@ class _ProfileContent extends StatelessWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Выход'),
-        content: const Text('Вы уверены что хотите выйти?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Назад'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<AppRepository>().signOut();
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                NavigatorNames.checkAuth,
-                (route) => false,
-              );
-            },
-            child: const Text('Выход'),
-          ),
-        ],
-      ),
-    );
-  }
-
   String _formatDate(DateTime date) {
     return '${date.day}.${date.month}.${date.year}';
   }

@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/widgets.dart';
-import 'package:maxim_chat/bloc/auth/events.dart';
-import 'package:maxim_chat/bloc/auth/states.dart';
+import 'package:maxim_chat/bloc/auth/auth_events.dart';
+import 'package:maxim_chat/bloc/auth/auth_states.dart';
 import 'package:maxim_chat/data/repositories/app_repository.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {

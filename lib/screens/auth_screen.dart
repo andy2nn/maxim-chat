@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:maxim_chat/bloc/auth/auth_bloc.dart';
-import 'package:maxim_chat/bloc/auth/events.dart';
-import 'package:maxim_chat/bloc/auth/states.dart';
+import 'package:maxim_chat/bloc/auth/auth_events.dart';
+import 'package:maxim_chat/bloc/auth/auth_states.dart';
 import 'package:maxim_chat/data/repositories/app_repository.dart';
 import 'package:maxim_chat/main.dart';
 

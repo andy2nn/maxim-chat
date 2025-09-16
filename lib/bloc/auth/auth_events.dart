@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:maxim_chat/bloc/auth/states.dart';
+import 'package:maxim_chat/bloc/auth/auth_states.dart';
 
 abstract class AuthEvent extends Equatable {
   @override

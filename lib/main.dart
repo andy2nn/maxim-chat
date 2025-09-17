@@ -1,14 +1,16 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:maxim_chat/bloc/chat/chat_bloc.dart';
+import 'package:maxim_chat/bloc/profile/profile_bloc.dart';
+import 'package:maxim_chat/bloc/friends/friends_bloc.dart';
 import 'package:maxim_chat/data/repositories/app_repository.dart';
 import 'package:maxim_chat/data/repositories/chat_repository.dart';
 import 'package:maxim_chat/screens/auth_screen.dart';
 import 'package:maxim_chat/screens/check_auth_screen.dart';
 import 'package:maxim_chat/widgets/base_app.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +33,6 @@ class MaximChatApp extends StatelessWidget {
             home: Scaffold(body: Center(child: CircularProgressIndicator())),
           );
         }
-
         if (snapshot.hasError) {
           return MaterialApp(
             home: Scaffold(body: Center(child: Text('Error loading app'))),
@@ -44,17 +45,31 @@ class MaximChatApp extends StatelessWidget {
         return MultiProvider(
           providers: [
             Provider<AppRepository>.value(value: appRepository),
-            BlocProvider<ChatBloc>(
-              create: (_) => ChatBloc(chatRepository: chatRepository),
-            ),
+            Provider<ChatRepository>.value(value: chatRepository),
           ],
-          child: MaterialApp(
-            routes: {
-              NavigatorNames.base: (context) => BaseApp(),
-              NavigatorNames.checkAuth: (context) => CheckAuthScreen(),
-              NavigatorNames.auth: (context) => AuthScreen(),
-            },
-            initialRoute: NavigatorNames.checkAuth,
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider<ChatBloc>(
+                create: (context) => ChatBloc(chatRepository: chatRepository),
+              ),
+              BlocProvider<FriendsBloc>(
+                create: (context) => FriendsBloc(
+                  appRepository: appRepository,
+                  currentUserId: appRepository.userId!,
+                ),
+              ),
+              BlocProvider<ProfileBloc>(
+                create: (context) => ProfileBloc(appRepository: appRepository),
+              ),
+            ],
+            child: MaterialApp(
+              routes: {
+                NavigatorNames.base: (context) => BaseApp(),
+                NavigatorNames.checkAuth: (context) => CheckAuthScreen(),
+                NavigatorNames.auth: (context) => AuthScreen(),
+              },
+              initialRoute: NavigatorNames.checkAuth,
+            ),
           ),
         );
       },

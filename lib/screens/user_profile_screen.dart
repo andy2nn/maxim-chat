@@ -28,7 +28,6 @@ class UserProfileScreen extends StatelessWidget {
       );
     }
 
-    // ✅ Оборачиваем экран MultiBlocProvider, чтобы FriendsBloc был доступен
     return MultiBlocProvider(
       providers: [
         BlocProvider(

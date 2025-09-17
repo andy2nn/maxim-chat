@@ -2,36 +2,34 @@ import 'package:flutter/material.dart';
 import '../data/models/user.dart';
 
 class ContactsScreen extends StatefulWidget {
-  final void Function(List<User>) onSelect;
+  final List<User> friends;
+  final Future<void> Function(List<User> selectedUsers, String? groupName)
+  onSelect;
 
-  const ContactsScreen({super.key, required this.onSelect});
+  const ContactsScreen({
+    super.key,
+    required this.friends,
+    required this.onSelect,
+  });
 
   @override
   State<ContactsScreen> createState() => _ContactsScreenState();
 }
 
 class _ContactsScreenState extends State<ContactsScreen> {
-  final List<User> allUsers = []; // Загрузи из репозитория
   final List<User> selectedUsers = [];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Выберите участников'),
-        actions: [
-          TextButton(
-            onPressed: () => widget.onSelect(selectedUsers),
-            child: const Text('Создать', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-      body: ListView.builder(
-        itemCount: allUsers.length,
-        itemBuilder: (context, index) {
-          final user = allUsers[index];
-          final isSelected = selectedUsers.contains(user);
+    final isGroup = selectedUsers.length > 1;
 
+    return Scaffold(
+      appBar: AppBar(title: const Text('Выберите участников')),
+      body: ListView.builder(
+        itemCount: widget.friends.length,
+        itemBuilder: (context, index) {
+          final user = widget.friends[index];
+          final isSelected = selectedUsers.contains(user);
           return ListTile(
             leading: CircleAvatar(
               backgroundColor: Colors.blue,
@@ -41,14 +39,55 @@ class _ContactsScreenState extends State<ContactsScreen> {
             trailing: isSelected ? const Icon(Icons.check) : null,
             onTap: () {
               setState(() {
-                if (isSelected)
+                if (isSelected) {
                   selectedUsers.remove(user);
-                else
+                } else {
                   selectedUsers.add(user);
+                }
               });
             },
           );
         },
+      ),
+      floatingActionButton: selectedUsers.isEmpty
+          ? null
+          : FloatingActionButton.extended(
+              label: Text(isGroup ? 'Создать группу' : 'Создать чат'),
+              icon: const Icon(Icons.chat),
+              onPressed: () async {
+                String? groupName;
+                if (isGroup) {
+                  groupName = await _showGroupNameDialog();
+                  if (groupName == null || groupName.trim().isEmpty) return;
+                }
+                await widget.onSelect(selectedUsers, groupName?.trim());
+              },
+            ),
+    );
+  }
+
+  Future<String?> _showGroupNameDialog() async {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Название группы'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'Введите название группы',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Создать'),
+          ),
+        ],
       ),
     );
   }

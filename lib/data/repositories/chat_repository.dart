@@ -16,7 +16,6 @@ class ChatRepository {
     final chatRef = _db.child('chats').child(message.chatId).push();
     await chatRef.set(message.toMap());
 
-    // Обновляем lastMessage для всех участников
     for (var uid in message.chatMembers) {
       await _db.child('chats_metadata').child(uid).child(message.chatId).set({
         'lastMessage': message.text,

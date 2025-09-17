@@ -56,8 +56,9 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: BlocBuilder<ChatBloc, ChatState>(
               builder: (context, state) {
-                if (state is MessagesLoading)
+                if (state is MessagesLoading) {
                   return const Center(child: CircularProgressIndicator());
+                }
                 if (state is MessagesLoaded) {
                   final messages = state.messages;
                   return ListView.builder(
@@ -91,8 +92,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   );
                 }
-                if (state is ChatError)
+                if (state is ChatError) {
                   return Center(child: Text(state.message));
+                }
                 return const SizedBox.shrink();
               },
             ),

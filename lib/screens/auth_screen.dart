@@ -129,7 +129,6 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  // Пока без востановления
   Widget _buildForgotForm(BuildContext context, AuthBloc bloc) {
     return Column(
       children: [

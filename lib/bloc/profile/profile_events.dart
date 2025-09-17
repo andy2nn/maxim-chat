@@ -59,23 +59,23 @@ class SendMessageEvent extends ProfileEvent {
   List<Object> get props => [uid];
 }
 
-class AddFriendEvent extends ProfileEvent {
-  final String uid;
-  final String friendsUid;
-  AddFriendEvent({required this.uid, required this.friendsUid});
+// class AddFriendEvent extends ProfileEvent {
+//   final String uid;
+//   final String friendsUid;
+//   AddFriendEvent({required this.uid, required this.friendsUid});
 
-  @override
-  List<Object> get props => [uid, friendsUid];
-}
+//   @override
+//   List<Object> get props => [uid, friendsUid];
+// }
 
-class RemoveFriendEvent extends ProfileEvent {
-  final String uid;
-  final String friendsUid;
-  RemoveFriendEvent({required this.uid, required this.friendsUid});
+// class RemoveFriendEvent extends ProfileEvent {
+//   final String uid;
+//   final String friendsUid;
+//   RemoveFriendEvent({required this.uid, required this.friendsUid});
 
-  @override
-  List<Object> get props => [uid, friendsUid];
-}
+//   @override
+//   List<Object> get props => [uid, friendsUid];
+// }
 
 class ChangeAvatarEvent extends ProfileEvent {
   final String uid;

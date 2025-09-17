@@ -14,8 +14,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<UpdateProfileEvent>(_onUpdateProfile);
     on<CancelEditEvent>(_onCancelEdit);
     on<ChangeAvatarEvent>(_onChangeAvatar);
-    on<AddFriendEvent>(_addFriend);
-    on<RemoveFriendEvent>(_removeFriend);
+    // on<AddFriendEvent>(_addFriend);
+    // on<RemoveFriendEvent>(_removeFriend);
   }
 
   Future<void> _onLoadProfile(
@@ -98,87 +98,87 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
   }
 
-  Future<void> _addFriend(
-    AddFriendEvent event,
-    Emitter<ProfileState> emit,
-  ) async {
-    try {
-      final currentUser = await _getUser(event.uid);
-      final targetUser = await _getUser(event.friendsUid);
+  // Future<void> _addFriend(
+  //   AddFriendEvent event,
+  //   Emitter<ProfileState> emit,
+  // ) async {
+  //   try {
+  //     final currentUser = await _getUser(event.uid);
+  //     final targetUser = await _getUser(event.friendsUid);
 
-      if (currentUser == null || targetUser == null) {
-        emit(const ProfileError(errorMessage: 'User not found'));
-        return;
-      }
+  //     if (currentUser == null || targetUser == null) {
+  //       emit(const ProfileError(errorMessage: 'User not found'));
+  //       return;
+  //     }
 
-      // Используем List вместо Set и создаем новый список
-      final updatedCurrentUserFriends = List<String>.from(
-        currentUser.friendsUids,
-      )..add(event.friendsUid);
+  //     // Используем List вместо Set и создаем новый список
+  //     final updatedCurrentUserFriends = List<String>.from(
+  //       currentUser.friendsUids,
+  //     )..add(event.friendsUid);
 
-      final updatedTargetUserFriends = List<String>.from(targetUser.friendsUids)
-        ..add(event.uid);
+  //     final updatedTargetUserFriends = List<String>.from(targetUser.friendsUids)
+  //       ..add(event.uid);
 
-      final updatedCurrentUser = currentUser.copyWith(
-        friendsUids: updatedCurrentUserFriends,
-      );
+  //     final updatedCurrentUser = currentUser.copyWith(
+  //       friendsUids: updatedCurrentUserFriends,
+  //     );
 
-      final updatedTargetUser = targetUser.copyWith(
-        friendsUids: updatedTargetUserFriends,
-      );
+  //     final updatedTargetUser = targetUser.copyWith(
+  //       friendsUids: updatedTargetUserFriends,
+  //     );
 
-      await appRepository.updateUser(updatedCurrentUser);
-      await appRepository.updateUser(updatedTargetUser);
+  //     await appRepository.updateUser(updatedCurrentUser);
+  //     await appRepository.updateUser(updatedTargetUser);
 
-      if (state is ProfileLoaded &&
-          (state as ProfileLoaded).user.uid == event.friendsUid) {
-        emit(ProfileLoaded(user: updatedTargetUser, isCurrentUser: false));
-      }
-    } catch (e) {
-      emit(ProfileError(errorMessage: e.toString()));
-    }
-  }
+  //     if (state is ProfileLoaded &&
+  //         (state as ProfileLoaded).user.uid == event.friendsUid) {
+  //       emit(ProfileLoaded(user: updatedTargetUser, isCurrentUser: false));
+  //     }
+  //   } catch (e) {
+  //     emit(ProfileError(errorMessage: e.toString()));
+  //   }
+  // }
 
-  Future<void> _removeFriend(
-    RemoveFriendEvent event,
-    Emitter<ProfileState> emit,
-  ) async {
-    try {
-      final currentUser = await _getUser(event.uid);
-      final targetUser = await _getUser(event.friendsUid);
+  // Future<void> _removeFriend(
+  //   RemoveFriendEvent event,
+  //   Emitter<ProfileState> emit,
+  // ) async {
+  //   try {
+  //     final currentUser = await _getUser(event.uid);
+  //     final targetUser = await _getUser(event.friendsUid);
 
-      if (currentUser == null || targetUser == null) {
-        emit(const ProfileError(errorMessage: 'User not found'));
-        return;
-      }
+  //     if (currentUser == null || targetUser == null) {
+  //       emit(const ProfileError(errorMessage: 'User not found'));
+  //       return;
+  //     }
 
-      // Создаем новые списки без удаленного друга
-      final updatedCurrentUserFriends = List<String>.from(
-        currentUser.friendsUids,
-      )..remove(event.friendsUid);
+  //     // Создаем новые списки без удаленного друга
+  //     final updatedCurrentUserFriends = List<String>.from(
+  //       currentUser.friendsUids,
+  //     )..remove(event.friendsUid);
 
-      final updatedTargetUserFriends = List<String>.from(targetUser.friendsUids)
-        ..remove(event.uid);
+  //     final updatedTargetUserFriends = List<String>.from(targetUser.friendsUids)
+  //       ..remove(event.uid);
 
-      final updatedCurrentUser = currentUser.copyWith(
-        friendsUids: updatedCurrentUserFriends,
-      );
+  //     final updatedCurrentUser = currentUser.copyWith(
+  //       friendsUids: updatedCurrentUserFriends,
+  //     );
 
-      final updatedTargetUser = targetUser.copyWith(
-        friendsUids: updatedTargetUserFriends,
-      );
+  //     final updatedTargetUser = targetUser.copyWith(
+  //       friendsUids: updatedTargetUserFriends,
+  //     );
 
-      await appRepository.updateUser(updatedCurrentUser);
-      await appRepository.updateUser(updatedTargetUser);
+  //     await appRepository.updateUser(updatedCurrentUser);
+  //     await appRepository.updateUser(updatedTargetUser);
 
-      if (state is ProfileLoaded &&
-          (state as ProfileLoaded).user.uid == event.friendsUid) {
-        emit(ProfileLoaded(user: updatedTargetUser, isCurrentUser: false));
-      }
-    } catch (e) {
-      emit(ProfileError(errorMessage: e.toString()));
-    }
-  }
+  //     if (state is ProfileLoaded &&
+  //         (state as ProfileLoaded).user.uid == event.friendsUid) {
+  //       emit(ProfileLoaded(user: updatedTargetUser, isCurrentUser: false));
+  //     }
+  //   } catch (e) {
+  //     emit(ProfileError(errorMessage: e.toString()));
+  //   }
+  // }
 
   Future<User?> _getUser(String userId) async {
     final userStream = appRepository.userStream(userId);

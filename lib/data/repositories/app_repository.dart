@@ -64,6 +64,36 @@ class AppRepository {
 
   Future<void> updateUser(User user) => userRepository.updateUser(user);
 
+  Future<void> sendFriendRequest(String fromUid, String toUid) =>
+      userRepository.sendFriendRequest(fromUid, toUid);
+
+  Future<void> acceptFriendRequest(String acceptorUid, String requesterUid) =>
+      userRepository.acceptFriendRequest(acceptorUid, requesterUid);
+
+  Future<void> rejectFriendRequest(String rejectorUid, String requesterUid) =>
+      userRepository.rejectFriendRequest(rejectorUid, requesterUid);
+
+  Future<void> removeFriend(String uid1, String uid2) =>
+      userRepository.removeFriend(uid1, uid2);
+
+  Future<void> cancelFriendRequest(String fromUid, String toUid) =>
+      userRepository.cancelFriendRequest(fromUid, toUid);
+
+  Stream<List<String>> friendsStream(String uid) =>
+      userRepository.friendsStream(uid);
+
+  Stream<List<String>> friendRequestsStream(String uid) =>
+      userRepository.friendRequestsStream(uid);
+
+  Stream<List<String>> friendSendsRequestsStream(String uid) =>
+      userRepository.friendSendsRequestsStream(uid);
+
+  Stream<List<User>> friendsWithDetailsStream(String uid) =>
+      userRepository.friendsWithDetailsStream(uid);
+
+  Stream<List<User>> searchUsers(String query) =>
+      userRepository.searchUsers(query);
+
   bool get isAuthenticated => authRepository.isAuthenticated;
 
   String? get userId => authRepository.userId;

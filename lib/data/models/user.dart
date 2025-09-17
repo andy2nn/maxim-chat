@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 
 class User {
@@ -39,14 +38,21 @@ class User {
       friendsSendsRequests: List<String>.from(
         map['friendsSendsRequests'] as List<dynamic>? ?? [],
       ),
-      createdAt: map['createdAt'] != null
-          ? DateTime.parse(map['createdAt'] as String)
-          : null,
-      lastSeen: map['lastSeen'] != null
-          ? DateTime.parse(map['lastSeen'] as String)
-          : null,
+      createdAt: _parseDateTime(map['createdAt']),
+      lastSeen: _parseDateTime(map['lastSeen']),
       photoBase64: map['photoBase64'] as String?,
     );
+  }
+
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+
+    if (value is int || value is String && value.contains(RegExp(r'^\d+$'))) {
+      return DateTime.fromMillisecondsSinceEpoch(int.parse(value.toString()));
+    } else if (value is String) {
+      return DateTime.parse(value);
+    }
+    return null;
   }
 
   Map<String, dynamic> toMap() {
@@ -57,11 +63,15 @@ class User {
       'friendsUids': friendsUids,
       'friendsRequests': friendsRequests,
       'friendsSendsRequests': friendsSendsRequests,
-      'createdAt': createdAt?.millisecondsSinceEpoch,
-      'lastSeen': lastSeen?.millisecondsSinceEpoch,
+      'createdAt': createdAt?.toIso8601String(),
+      'lastSeen': lastSeen?.toIso8601String(),
       'photoBase64': photoBase64,
     };
   }
+
+  bool hasFriendRequestFrom(String uid) => friendsRequests.contains(uid);
+  bool hasSentFriendRequestTo(String uid) => friendsSendsRequests.contains(uid);
+  bool isFriend(String uid) => friendsUids.contains(uid);
 
   User copyWith({
     String? uid,
@@ -88,7 +98,6 @@ class User {
   }
 
   String toJson() => json.encode(toMap());
-
   factory User.fromJson(String source) =>
       User.fromMap(json.decode(source) as Map<String, dynamic>);
 
@@ -100,7 +109,6 @@ class User {
   @override
   bool operator ==(covariant User other) {
     if (identical(this, other)) return true;
-
     return other.uid == uid &&
         other.email == email &&
         other.username == username &&

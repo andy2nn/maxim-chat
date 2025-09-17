@@ -6,9 +6,11 @@ import 'package:maxim_chat/bloc/friends/friends_events.dart';
 import 'package:maxim_chat/bloc/profile/profile_bloc.dart';
 import 'package:maxim_chat/bloc/profile/profile_events.dart';
 import 'package:maxim_chat/bloc/profile/profile_states.dart';
+import 'package:maxim_chat/data/models/chat.dart';
 import 'package:maxim_chat/data/models/user.dart';
 import 'package:maxim_chat/data/repositories/app_repository.dart';
 import 'package:maxim_chat/main.dart';
+import 'package:maxim_chat/screens/chat_screen.dart';
 
 class UserProfileScreen extends StatelessWidget {
   final String? userId;
@@ -26,7 +28,6 @@ class UserProfileScreen extends StatelessWidget {
       );
     }
 
-    // ✅ Оборачиваем экран MultiBlocProvider, чтобы FriendsBloc был доступен
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -178,11 +179,57 @@ class _ProfileContent extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/chat', arguments: user.uid);
+                  onPressed: () async {
+                    final currentUserId = context.read<AppRepository>().userId;
+                    if (currentUserId == null) return;
+
+                    final chatRepo = context
+                        .read<AppRepository>()
+                        .chatRepository;
+
+                    final members = [currentUserId, user.uid];
+                    members.sort();
+                    final chatId = members.join('_');
+
+                    final chatExistsSnapshot = await chatRepo.db
+                        .child('chats')
+                        .child(chatId)
+                        .get();
+
+                    late Chat chat;
+                    if (chatExistsSnapshot.exists) {
+                      chat = Chat.fromMap(
+                        Map<String, dynamic>.from(
+                          chatExistsSnapshot.value as Map,
+                        ),
+                      );
+                    } else {
+                      await chatRepo.createChat(
+                        [currentUserId, user.uid],
+                        isGroup: false,
+                        name: user.username,
+                      );
+                      chat = Chat(
+                        id: chatId,
+                        members: members,
+                        isGroup: false,
+                        name: user.username,
+                      );
+                    }
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ChatScreen(
+                          chat: chat,
+                          currentUserId: currentUserId,
+                        ),
+                      ),
+                    );
                   },
                   child: const Text("Чат"),
                 ),
+
                 if (user.friendsUids.contains(
                   context.read<AppRepository>().userId,
                 ))

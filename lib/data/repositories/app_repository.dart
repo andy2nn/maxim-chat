@@ -1,3 +1,5 @@
+import 'package:maxim_chat/data/models/chat.dart';
+
 import 'auth_repository.dart';
 import 'chat_repository.dart';
 import 'user_repository.dart';
@@ -31,17 +33,20 @@ class AppRepository {
     );
   }
 
-  Future<void> sendMessage(String senderId, String receiverId, Message msg) =>
-      chatRepository.sendMessage(senderId, receiverId, msg);
+  Future<void> sendMessage(Message message) =>
+      chatRepository.sendMessage(message);
 
-  Stream<List<Message>> getMessages(String uid1, String uid2) =>
-      chatRepository.getMessages(uid1, uid2);
+  Stream<List<Message>> getMessages(String chatId) =>
+      chatRepository.getMessages(chatId);
 
-  Stream<Map<String, dynamic>> getUserChats(String userId) =>
+  Stream<List<Chat>> getUserChats(String userId) =>
       chatRepository.getUserChats(userId);
 
-  Future<void> createChat(String uid1, String uid2) =>
-      chatRepository.createChat(uid1, uid2);
+  Future<Chat> createChat(
+    List<String> members, {
+    String name = '',
+    bool isGroup = false,
+  }) => chatRepository.createChat(members, name: name, isGroup: isGroup);
 
   Future<User?> signUp(
     String email,

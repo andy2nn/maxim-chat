@@ -51,8 +51,7 @@ class _FriendsScreenState extends State<FriendsScreen>
       )..add(LoadFriendsEvent(currentUserId)),
       child: Builder(
         builder: (innerContext) {
-          // onSearchChanged теперь использует innerContext, который уже обёрнут провайдером
-          void _onSearchChanged(String query) {
+          void onSearchChanged(String query) {
             _searchDebounce?.cancel();
             _searchDebounce = Timer(const Duration(milliseconds: 500), () {
               innerContext.read<FriendsBloc>().add(SearchUsersEvent(query));
@@ -84,7 +83,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    onChanged: _onSearchChanged,
+                    onChanged: onSearchChanged,
                   ),
                 ),
                 Expanded(

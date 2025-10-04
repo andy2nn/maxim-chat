@@ -21,7 +21,6 @@ class UserProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final targetUserId = userId ?? context.read<AppRepository>().userId;
-
     if (targetUserId == null) {
       return const Scaffold(
         body: Center(child: Text('Пользователь не найден')),
@@ -47,12 +46,22 @@ class UserProfileScreen extends StatelessWidget {
         ),
       ],
       child: Scaffold(
+        backgroundColor: Colors.blue.shade50,
         appBar: AppBar(
-          title: const Text('Профиль'),
+          backgroundColor: Colors.blue.shade50,
+          elevation: 0,
+          iconTheme: IconThemeData(color: Colors.blue.shade800),
+          title: Text(
+            'Профиль',
+            style: TextStyle(
+              color: Colors.blue.shade800,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           actions: [
             if (isCurrentUser)
               IconButton(
-                icon: const Icon(Icons.logout),
+                icon: Icon(Icons.logout, color: Colors.blue.shade800),
                 onPressed: () => _showLogoutDialog(context),
               ),
           ],
@@ -107,11 +116,14 @@ class _ProfileContent extends StatelessWidget {
       builder: (context, state) {
         if (state is ProfileLoading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (state is ProfileError) {
+        }
+        if (state is ProfileError) {
           return Center(child: Text('Ошибка: ${state.errorMessage}'));
-        } else if (state is ProfileLoaded) {
+        }
+        if (state is ProfileLoaded) {
           return _buildProfileContent(context, state.user, state.isCurrentUser);
-        } else if (state is ProfileEditMode) {
+        }
+        if (state is ProfileEditMode) {
           return _buildEditForm(context, state.user);
         }
         return const Center(child: Text('Данные недоступны'));
@@ -124,177 +136,252 @@ class _ProfileContent extends StatelessWidget {
     User user,
     bool isCurrentUser,
   ) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-      child: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.grey[300],
-              border: Border.all(color: Colors.blue, width: 2),
-            ),
-            width: 200,
-            height: 200,
-            child: user.photoBase64 != null
-                ? ClipOval(
-                    child: Image.memory(
-                      base64.decode(user.photoBase64!),
-                      width: 200,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                : const Icon(Icons.person, size: 80, color: Colors.grey),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            user.username,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(user.email, style: TextStyle(color: Colors.grey[600])),
-          const SizedBox(height: 20),
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWeb = screenWidth > 800;
+    final contentWidth = isWeb ? 600.0 : double.infinity;
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildStatItem('Друзья', user.friendsUids.length),
-              _buildStatItem('Запросы', user.friendsRequests.length),
-              _buildStatItem('Отправленные', user.friendsSendsRequests.length),
-            ],
-          ),
-          const SizedBox(height: 30),
-
-          if (isCurrentUser)
-            ElevatedButton(
-              onPressed: () {
-                context.read<ProfileBloc>().add(EditProfileEvent(user: user));
-              },
-              style: ElevatedButton.styleFrom(minimumSize: const Size(200, 50)),
-              child: const Text("Редактировать профиль"),
-            )
-          else
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    final currentUserId = context.read<AppRepository>().userId;
-                    if (currentUserId == null) return;
-
-                    final chatRepo = context
-                        .read<AppRepository>()
-                        .chatRepository;
-
-                    final members = [currentUserId, user.uid];
-                    members.sort();
-                    final chatId = members.join('_');
-
-                    final chatExistsSnapshot = await chatRepo.db
-                        .child('chats')
-                        .child(chatId)
-                        .get();
-
-                    late Chat chat;
-                    if (chatExistsSnapshot.exists) {
-                      chat = Chat.fromMap(
-                        Map<String, dynamic>.from(
-                          chatExistsSnapshot.value as Map,
-                        ),
-                      );
-                    } else {
-                      await chatRepo.createChat(
-                        [currentUserId, user.uid],
-                        isGroup: false,
-                        name: user.username,
-                      );
-                      chat = Chat(
-                        id: chatId,
-                        members: members,
-                        isGroup: false,
-                        name: user.username,
-                      );
-                    }
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ChatScreen(
-                          chat: chat,
-                          currentUserId: currentUserId,
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text("Чат"),
+    return Center(
+      child: Container(
+        width: contentWidth,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Column(
+          children: [
+            // Аватар с градиентом и тенью
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [Colors.blue.shade300, Colors.blue.shade500],
                 ),
-
-                if (user.friendsUids.contains(
-                  context.read<AppRepository>().userId,
-                ))
-                  ElevatedButton(
-                    onPressed: () {
-                      final currentUserId = context
-                          .read<AppRepository>()
-                          .userId;
-                      if (currentUserId != null) {
-                        context.read<FriendsBloc>().add(
-                          RemoveFriendEvent(currentUserId, user.uid),
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text("Удалить друга"),
-                  )
-                else if (user.friendsRequests.contains(
-                  context.read<AppRepository>().userId,
-                ))
-                  const ElevatedButton(
-                    onPressed: null,
-                    child: Text("Запрос отправлен"),
-                  )
-                else
-                  ElevatedButton(
-                    onPressed: () {
-                      final currentUserId = context
-                          .read<AppRepository>()
-                          .userId;
-                      if (currentUserId != null) {
-                        context.read<FriendsBloc>().add(
-                          SendFriendRequestEvent(currentUserId, user.uid),
-                        );
-                      }
-                    },
-                    child: const Text("Добавить друга"),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 15,
+                    offset: const Offset(0, 6),
                   ),
-              ],
+                ],
+              ),
+              child: CircleAvatar(
+                radius: isWeb ? 100 : 80,
+                backgroundColor: Colors.grey.shade100,
+                child: user.photoBase64 != null
+                    ? ClipOval(
+                        child: Image.memory(
+                          base64.decode(user.photoBase64!),
+                          width: isWeb ? 200 : 160,
+                          height: isWeb ? 200 : 160,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : const Icon(Icons.person, size: 80, color: Colors.white),
+              ),
             ),
-        ],
+            const SizedBox(height: 20),
+            Text(
+              user.username,
+              style: TextStyle(
+                fontSize: isWeb ? 28 : 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              user.email,
+              style: TextStyle(
+                color: Colors.grey.shade700,
+                fontSize: isWeb ? 16 : 14,
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Статистика
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 4,
+              shadowColor: Colors.blue.shade100,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 16,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildStatItem(
+                      'Друзья',
+                      user.friendsUids.length,
+                      Colors.blue.shade700,
+                    ),
+                    _buildStatItem(
+                      'Запросы',
+                      user.friendsRequests.length,
+                      Colors.green.shade700,
+                    ),
+                    _buildStatItem(
+                      'Отправленные',
+                      user.friendsSendsRequests.length,
+                      Colors.orange.shade700,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+            // Кнопки действий
+            isCurrentUser
+                ? ElevatedButton(
+                    onPressed: () => context.read<ProfileBloc>().add(
+                      EditProfileEvent(user: user),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(double.infinity, 50),
+                      backgroundColor: Colors.blue.shade600,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Text(
+                      "Редактировать профиль",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
+                : Wrap(
+                    spacing: 20,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => _openChat(context, user),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade600,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          minimumSize: const Size(140, 45),
+                        ),
+                        child: const Text("Чат"),
+                      ),
+                      _buildFriendActionButton(context, user),
+                    ],
+                  ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildStatItem(String label, int count) {
+  Widget _buildStatItem(String label, int count, Color color) {
     return Column(
       children: [
         Text(
           '$count',
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
         ),
-        Text(label, style: const TextStyle(color: Colors.grey)),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(color: Colors.black54)),
       ],
     );
+  }
+
+  void _openChat(BuildContext context, User user) async {
+    final currentUserId = context.read<AppRepository>().userId;
+    if (currentUserId == null) return;
+    final chatRepo = context.read<AppRepository>().chatRepository;
+    final members = [currentUserId, user.uid]..sort();
+    final chatId = members.join('_');
+
+    final chatExistsSnapshot = await chatRepo.db
+        .child('chats')
+        .child(chatId)
+        .get();
+    late Chat chat;
+    if (chatExistsSnapshot.exists) {
+      chat = Chat.fromMap(
+        Map<String, dynamic>.from(chatExistsSnapshot.value as Map),
+      );
+    } else {
+      await chatRepo.createChat(
+        [currentUserId, user.uid],
+        isGroup: false,
+        name: user.username,
+      );
+      chat = Chat(
+        id: chatId,
+        members: members,
+        isGroup: false,
+        name: user.username,
+      );
+    }
+
+    Navigator.push(
+      // ignore: use_build_context_synchronously
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatScreen(chat: chat, currentUserId: currentUserId),
+      ),
+    );
+  }
+
+  Widget _buildFriendActionButton(BuildContext context, User user) {
+    final currentUserId = context.read<AppRepository>().userId;
+    if (currentUserId == null) return const SizedBox.shrink();
+    if (user.friendsUids.contains(currentUserId)) {
+      return ElevatedButton(
+        onPressed: () => context.read<FriendsBloc>().add(
+          RemoveFriendEvent(currentUserId, user.uid),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.red.shade400,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          minimumSize: const Size(140, 45),
+        ),
+        child: const Text("Удалить"),
+      );
+    } else if (user.friendsRequests.contains(currentUserId)) {
+      return ElevatedButton(
+        onPressed: null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey.shade300,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          minimumSize: const Size(140, 45),
+        ),
+        child: const Text("Запрос отправлен"),
+      );
+    } else {
+      return ElevatedButton(
+        onPressed: () => context.read<FriendsBloc>().add(
+          SendFriendRequestEvent(currentUserId, user.uid),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green.shade400,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          minimumSize: const Size(140, 45),
+        ),
+        child: const Text("Добавить"),
+      );
+    }
   }
 
   Widget _buildEditForm(BuildContext context, User user) {
     final usernameController = TextEditingController(text: user.username);
     final emailController = TextEditingController(text: user.email);
 
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
@@ -333,6 +420,10 @@ class _ProfileContent extends StatelessWidget {
               ElevatedButton(
                 onPressed: () =>
                     context.read<ProfileBloc>().add(CancelEditEvent()),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey.shade400,
+                  minimumSize: const Size(120, 45),
+                ),
                 child: const Text('Назад'),
               ),
               ElevatedButton(
@@ -345,6 +436,10 @@ class _ProfileContent extends StatelessWidget {
                     ),
                   );
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade600,
+                  minimumSize: const Size(120, 45),
+                ),
                 child: const Text('Сохранить'),
               ),
             ],

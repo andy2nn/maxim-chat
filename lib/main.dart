@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:maxim_chat/firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:maxim_chat/bloc/chat/chat_bloc.dart';
@@ -14,7 +15,7 @@ import 'package:maxim_chat/widgets/base_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final chatRepository = ChatRepository();
   runApp(MaximChatApp(chatRepository: chatRepository));
 }
